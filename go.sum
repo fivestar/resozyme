@@ -1,0 +1,6 @@
+github.com/go-chi/chi v4.0.2+incompatible h1:maB6vn6FqCxrpz4FqWdh4+lwpyZIQS7YEAUcHlgXVRs=
+github.com/go-chi/chi v4.0.2+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
+github.com/nvellon/hal v0.3.0 h1:0Mpwa5i+c6voWs7N7uLv2ptMqLcI+u13T7lxYnPaBdQ=
+github.com/nvellon/hal v0.3.0/go.mod h1:FfxMoXa4BbxypoTSaaXcgATT1HVnZ/LluM6CZzDNrYc=
+github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
+github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
