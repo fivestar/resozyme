@@ -8,16 +8,16 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/fivestar/resozyme"
 	"github.com/fivestar/resozyme/_examples/model"
 	"github.com/fivestar/resozyme/_examples/repos"
-	"github.com/fivestar/resozyme/resource"
 	"github.com/go-chi/chi"
 )
 
 // NewArticleResource creates an ArticleResource.
-func NewArticleResource(ctx context.Context) resource.Resource {
+func NewArticleResource(ctx context.Context) resozyme.Resource {
 	return &ArticleResource{
-		Base:        resource.NewBase(ctx),
+		Base:        resozyme.NewBase(ctx),
 		view:        &articleView{},
 		articleRepo: repos.NewArticleRepository(),
 	}
@@ -25,7 +25,7 @@ func NewArticleResource(ctx context.Context) resource.Resource {
 
 // ArticleResource is a resource.
 type ArticleResource struct {
-	*resource.Base
+	*resozyme.Base
 	view        *articleView
 	articleID   int64
 	articleRepo repos.ArticleRepository
@@ -74,7 +74,7 @@ func (resc *ArticleResource) OnGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resource.BindTo(resc, article)
+	resozyme.BindTo(resc, article)
 }
 
 // OnPatch handles the PATCH request.
@@ -93,7 +93,7 @@ func (resc *ArticleResource) OnPatch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//
-	resource.BindTo(resc, article)
+	resozyme.BindTo(resc, article)
 
 	if err := submitArticle(r, resc.view, article); err != nil {
 		resc.SetCode(http.StatusBadRequest)
@@ -101,7 +101,7 @@ func (resc *ArticleResource) OnPatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resource.BindTo(resc, article)
+	resozyme.BindTo(resc, article)
 }
 
 // submitArticle submits request body to an article.

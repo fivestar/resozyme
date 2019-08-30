@@ -1,4 +1,4 @@
-package resource
+package resozyme
 
 // Logger is a logger interface.
 // This interface is compatible with zap.SugaredLogger.

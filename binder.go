@@ -1,4 +1,4 @@
-package resource
+package resozyme
 
 // BindTo binds objects to the resource.
 func BindTo(resc Resource, args ...interface{}) Resource {

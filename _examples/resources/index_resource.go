@@ -4,20 +4,20 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/fivestar/resozyme/resource"
+	"github.com/fivestar/resozyme"
 )
 
 // NewIndexResource creates an IndexResource.
-func NewIndexResource(ctx context.Context) resource.Resource {
+func NewIndexResource(ctx context.Context) resozyme.Resource {
 	return &IndexResource{
-		Base: resource.NewBase(ctx),
+		Base: resozyme.NewBase(ctx),
 		view: &struct{}{},
 	}
 }
 
 // IndexResource is a resource.
 type IndexResource struct {
-	*resource.Base
+	*resozyme.Base
 	view      *struct{}
 	articleID int64
 }
@@ -34,5 +34,5 @@ func (resc *IndexResource) Href() string {
 
 // OnGet handles the GET request.
 func (resc *IndexResource) OnGet(w http.ResponseWriter, r *http.Request) {
-	resc.LinkResource("articles", resource.BindTo(NewArticlesResource(resc.Context())))
+	resc.LinkResource("articles", resozyme.BindTo(NewArticlesResource(resc.Context())))
 }

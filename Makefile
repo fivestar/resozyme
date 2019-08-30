@@ -8,3 +8,8 @@ test:
 lint:
 	@golint ./...
 	@$(GO) vet ./...
+
+.PHONY: run-example
+run-example:
+	@$(GO) run _examples/main.go
+

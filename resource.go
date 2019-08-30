@@ -1,11 +1,11 @@
-package resource
+package resozyme
 
 import (
 	"context"
 	"net/http"
 )
 
-// Resource is an interface represents the resource.
+// Resource represents a resource.
 type Resource interface {
 	// Href returns the pathinfo.
 	Href() string
@@ -75,7 +75,13 @@ type Resource interface {
 	OnDelete(w http.ResponseWriter, r *http.Request)
 }
 
-// Link is a link.
+// Renderer provides a resource renderer interface.
+type Renderer interface {
+	// Render renders a resource view.
+	Render(resc Resource, pretty bool) []byte
+}
+
+// Link represents a link.
 type Link struct {
 	Href string
 }

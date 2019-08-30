@@ -4,15 +4,15 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/fivestar/resozyme"
 	"github.com/fivestar/resozyme/_examples/model"
 	"github.com/fivestar/resozyme/_examples/repos"
-	"github.com/fivestar/resozyme/resource"
 )
 
 // NewArticlesResource creates an ArticlesResource.
-func NewArticlesResource(ctx context.Context) resource.Resource {
+func NewArticlesResource(ctx context.Context) resozyme.Resource {
 	return &ArticlesResource{
-		Base:        resource.NewBase(ctx),
+		Base:        resozyme.NewBase(ctx),
 		view:        &articlesView{},
 		articleRepo: repos.NewArticleRepository(),
 	}
@@ -20,7 +20,7 @@ func NewArticlesResource(ctx context.Context) resource.Resource {
 
 // ArticlesResource is a resource.
 type ArticlesResource struct {
-	*resource.Base
+	*resozyme.Base
 	view        *articlesView
 	articleRepo repos.ArticleRepository
 }
@@ -42,9 +42,9 @@ func (resc *ArticlesResource) Href() string {
 func (resc *ArticlesResource) Bind(i interface{}) {
 	switch v := i.(type) {
 	case []*model.Article:
-		var rescs []resource.Resource
+		var rescs []resozyme.Resource
 		for _, article := range v {
-			rescs = append(rescs, resource.BindTo(NewArticleResource(resc.Context()), article))
+			rescs = append(rescs, resozyme.BindTo(NewArticleResource(resc.Context()), article))
 		}
 		resc.EmbedCollection("articles", rescs)
 	}
@@ -59,7 +59,7 @@ func (resc *ArticlesResource) OnGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resource.BindTo(resc, articles)
+	resozyme.BindTo(resc, articles)
 }
 
 // OnPost handles the POST request.
@@ -77,7 +77,7 @@ func (resc *ArticlesResource) OnPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	aResc := resource.BindTo(NewArticleResource(resc.Context()), article)
+	aResc := resozyme.BindTo(NewArticleResource(resc.Context()), article)
 	resc.SetSubstituteView(aResc)
 	resc.SetCode(http.StatusCreated)
 	resc.Header().Add("Location", aResc.Href())
