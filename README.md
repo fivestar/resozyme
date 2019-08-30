@@ -6,7 +6,7 @@
 ## Installation
 
 ```console
-$ go get -u github.com/fivestar/resozyme/resource
+$ go get -u github.com/fivestar/resozyme
 ```
 
 
@@ -20,3 +20,4 @@ See [_examples/](https://github.com/fivestar/resozyme/blob/master/_examples/).
 Copyright (c) 2019 Katsuhiro Ogawa
 
 Licensed under the [MIT License](./LICENSE).
+
