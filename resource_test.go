@@ -46,3 +46,9 @@ func (resc *helloResource) OnGet(w http.ResponseWriter, r *http.Request) {
 	user := &helloUser{Name: "World"}
 	BindTo(resc, user)
 }
+
+func (resc *helloResource) OnPost(w http.ResponseWriter, r *http.Request) {
+	resc.SetCode(http.StatusCreated)
+	resc.Header().Add("Location", "https://example.com/loc")
+	resc.view = nil
+}

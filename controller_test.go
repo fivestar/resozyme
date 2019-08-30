@@ -10,13 +10,20 @@ import (
 	"github.com/go-chi/chi"
 )
 
-func TestController_ServeHTTP(t *testing.T) {
-	mx := chi.NewRouter()
+func TestDispatcher_ServeHTTP(t *testing.T) {
+	r := chi.NewRouter()
 
-	contr := NewController(mx, &NilLogger{}, false)
-	contr.DefaultRenderer = &HALRenderer{}
+	dispatcher := &Dispatcher{
+		router:          r,
+		defaultRenderer: NewJSONRenderer(),
+		errorHandler:    &ExposedErrorHandler{Renderer: NewJSONRenderer()},
+		logger:          &NilLogger{},
+		debug:           false,
+		prettyKey:       "pretty",
+	}
+	dispatcher.SetDefaultRenderer(NewHALRenderer())
 
-	Route(mx, "/hello", newHelloResource)
+	Route(r, "/hello", newHelloResource)
 
 	tests := []struct {
 		path       string
@@ -30,14 +37,27 @@ func TestController_ServeHTTP(t *testing.T) {
 			http.MethodGet,
 			http.StatusOK,
 			[]byte(`{"_links":{"self":{"href":"/hello"}},"text":"Hello, World"}`),
-			http.Header{},
+			http.Header{
+				"Content-Type": []string{"application/hal+json"},
+			},
+		},
+		{
+			"/hello",
+			http.MethodPost,
+			http.StatusCreated,
+			nil,
+			http.Header{
+				"Location": []string{"https://example.com/loc"},
+			},
 		},
 		{
 			"/hello",
 			http.MethodPatch,
 			http.StatusMethodNotAllowed,
 			[]byte(`{"message":"Method Not Allowed"}`),
-			http.Header{},
+			http.Header{
+				"Content-Type": []string{"application/json"},
+			},
 		},
 	}
 
@@ -49,7 +69,7 @@ func TestController_ServeHTTP(t *testing.T) {
 			r := httptest.NewRequest(tt.method, "http://example.com"+tt.path, nil)
 			w := httptest.NewRecorder()
 
-			contr.ServeHTTP(w, r)
+			dispatcher.ServeHTTP(w, r)
 
 			resp := w.Result()
 			body, err := ioutil.ReadAll(resp.Body)
@@ -63,6 +83,10 @@ func TestController_ServeHTTP(t *testing.T) {
 
 			if bytes.Compare(body, tt.wantBody) != 0 {
 				t.Fatalf("Unexpected body: got=%s, want=%s", string(body), string(tt.wantBody))
+			}
+
+			if len(resp.Header) != len(tt.wantHeader) {
+				t.Fatalf("Unexpected header len: got=%d, want=%d", len(resp.Header), len(tt.wantHeader))
 			}
 
 			for key := range tt.wantHeader {

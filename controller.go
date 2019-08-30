@@ -15,16 +15,14 @@ type ControllerContextKey struct{}
 type ResourceFactory = func(context.Context) Resource
 
 // NewController creates a controller.
-func NewController(r chi.Router, logger Logger, debug bool) *Controller {
-	return &Controller{
-		Router:          r,
-		DefaultRenderer: NewJSONRenderer(),
-		ErrorHandler: &ExposedErrorHandler{
-			Renderer: NewJSONRenderer(),
-		},
-		Logger:             logger,
-		Debug:              debug,
-		PrettyRenderingKey: "pretty",
+func NewController(r chi.Router, logger Logger, debug bool) *Dispatcher {
+	return &Dispatcher{
+		router:          r,
+		defaultRenderer: NewJSONRenderer(),
+		errorHandler:    &ExposedErrorHandler{Renderer: NewJSONRenderer()},
+		logger:          logger,
+		debug:           debug,
+		prettyKey:       "pretty",
 	}
 }
 
@@ -33,7 +31,7 @@ func Route(mx chi.Router, path string, fac ResourceFactory) {
 	mx.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		contr := GetController(ctx)
-		logger := contr.Logger
+		logger := contr.Logger()
 
 		resc := fac(ctx)
 
@@ -59,45 +57,72 @@ func Route(mx chi.Router, path string, fac ResourceFactory) {
 		}
 
 		// Prioritize to render a substitute view over an error view.
-		if contr.ErrorHandler.IsError(resc) && !resc.HasSubstituteView() {
-			errResc := contr.ErrorHandler.HandleError(resc, w, r)
-			contr.dispatch(errResc, w, r)
+		if contr.IsError(resc) && !resc.HasSubstituteView() {
+			errResc := contr.HandleError(resc, w, r)
+			contr.Dispatch(errResc, w, r)
 			return
 		}
 
-		contr.dispatch(resc, w, r)
+		contr.Dispatch(resc, w, r)
 	})
 }
 
-// Controller handles HTTP request and response.
-type Controller struct {
-	Router             chi.Router
-	DefaultRenderer    Renderer
-	ErrorHandler       ErrorHandler
-	Logger             Logger
-	Debug              bool
-	PrettyRenderingKey string
+// Controller provides a resource controller interface.
+type Controller interface {
+	http.Handler
+
+	// Dispatch dispatches a resource.
+	Dispatch(resc Resource, w http.ResponseWriter, r *http.Request)
+
+	// SetDefaultRenderer sets a default renderer.
+	SetDefaultRenderer(renderer Renderer)
+
+	// IsError checks whether a resource has an error or not.
+	IsError(resc Resource) bool
+
+	// HandleError handles an error resource.
+	HandleError(resc Resource, w http.ResponseWriter, r *http.Request) Resource
+
+	// Logger
+	Logger() Logger
+}
+
+// Dispatcher handles HTTP request and response.
+type Dispatcher struct {
+	router          chi.Router
+	defaultRenderer Renderer
+	errorHandler    ErrorHandler
+	logger          Logger
+	debug           bool
+	prettyKey       string
 }
 
 // ServeHTTP implements http.Handler.
-func (contr *Controller) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (dispatcher *Dispatcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	ctx = WithController(ctx, contr)
+	ctx = WithController(ctx, dispatcher)
 	ctx = WithActiveResourceContainer(ctx, NewResourceContainer())
 
 	r = r.WithContext(ctx)
 
-	contr.Router.ServeHTTP(w, r)
+	dispatcher.router.ServeHTTP(w, r)
 }
 
-// dispatch dispatches the resource to the response.
-func (contr *Controller) dispatch(resc Resource, w http.ResponseWriter, r *http.Request) {
+// SetDefaultRenderer implements Controller.
+func (dispatcher *Dispatcher) SetDefaultRenderer(renderer Renderer) {
+	dispatcher.defaultRenderer = renderer
+}
+
+// Dispatch implements Controller.
+func (dispatcher *Dispatcher) Dispatch(resc Resource, w http.ResponseWriter, r *http.Request) {
+	logger := dispatcher.Logger()
+
 	renderer := resc.Renderer()
 	if renderer == nil {
-		renderer = contr.DefaultRenderer
+		renderer = dispatcher.defaultRenderer
 	}
 
-	contr.Logger.Debugf(`Renderer: %T`, renderer)
+	logger.Debugf("Renderer: %T", renderer)
 
 	rr := resc
 	if resc.HasSubstituteView() {
@@ -109,7 +134,7 @@ func (contr *Controller) dispatch(resc Resource, w http.ResponseWriter, r *http.
 	view := rr.View()
 	vv := reflect.ValueOf(view)
 	if view != nil && (vv.Kind() == reflect.Struct || !vv.IsNil()) {
-		bytes = renderer.Render(rr, contr.isPrettyRendering(r))
+		bytes = renderer.Render(rr, dispatcher.prettyEnabled(r))
 	}
 
 	for k, v := range resc.Header() {
@@ -119,11 +144,26 @@ func (contr *Controller) dispatch(resc Resource, w http.ResponseWriter, r *http.
 	w.Write(bytes)
 }
 
-// isPrettyRendering checks whether the pretty-rendering mode is enabled or not.
-func (contr *Controller) isPrettyRendering(r *http.Request) bool {
-	enabled := contr.Debug
+// IsError implements Controller.
+func (dispatcher *Dispatcher) IsError(resc Resource) bool {
+	return dispatcher.errorHandler.IsError(resc)
+}
 
-	if v := r.URL.Query().Get(contr.PrettyRenderingKey); v != "" {
+// HandleError implements Controller.
+func (dispatcher *Dispatcher) HandleError(resc Resource, w http.ResponseWriter, r *http.Request) Resource {
+	return dispatcher.errorHandler.HandleError(resc, w, r)
+}
+
+// Logger implements Controller.
+func (dispatcher *Dispatcher) Logger() Logger {
+	return dispatcher.logger
+}
+
+// prettyEnabled checks whether the pretty-rendering mode is enabled or not.
+func (dispatcher *Dispatcher) prettyEnabled(r *http.Request) bool {
+	enabled := dispatcher.debug
+
+	if v := r.URL.Query().Get(dispatcher.prettyKey); v != "" {
 		enabled = (v != "0")
 	}
 

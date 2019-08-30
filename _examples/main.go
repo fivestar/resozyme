@@ -22,7 +22,7 @@ func main() {
 	debug := true
 
 	contr := resozyme.NewController(r, logger, debug)
-	contr.DefaultRenderer = resozyme.NewHALRenderer()
+	contr.SetDefaultRenderer(resozyme.NewHALRenderer())
 
 	log.Fatal(http.ListenAndServe(`:9393`, contr))
 }

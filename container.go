@@ -14,17 +14,17 @@ func NewResourceContainer() *ResourceContainer {
 }
 
 // WithController sets a controller to the context.
-func WithController(ctx context.Context, rcont *Controller) context.Context {
+func WithController(ctx context.Context, rcont Controller) context.Context {
 	return context.WithValue(ctx, ControllerContextKey{}, rcont)
 }
 
 // GetController gets a controller from the context.
-func GetController(ctx context.Context) *Controller {
+func GetController(ctx context.Context) Controller {
 	v := ctx.Value(ControllerContextKey{})
 	if v == nil {
 		return nil
 	}
-	return v.(*Controller)
+	return v.(Controller)
 }
 
 // WithActiveResourceContainer sets a resource container.
