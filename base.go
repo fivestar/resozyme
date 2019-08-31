@@ -85,21 +85,6 @@ func (resc *Base) SetError(err error) {
 	}
 }
 
-// SetSubstituteView implements resource.Resource.
-func (resc *Base) SetSubstituteView(sr Resource) {
-	resc.substituteView = sr
-}
-
-// HasSubstituteView implements resource.Resource.
-func (resc *Base) HasSubstituteView() bool {
-	return resc.substituteView != nil
-}
-
-// SubstituteView implements resource.Resource.
-func (resc *Base) SubstituteView() Resource {
-	return resc.substituteView
-}
-
 // Links implements resource.Resource.
 func (resc *Base) Links() map[string]Link {
 	return resc.links

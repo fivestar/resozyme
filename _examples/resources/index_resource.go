@@ -11,16 +11,18 @@ import (
 func NewIndexResource(ctx context.Context) resozyme.Resource {
 	return &IndexResource{
 		Base: resozyme.NewBase(ctx),
-		view: &struct{}{},
+		view: &indexView{},
 	}
 }
 
 // IndexResource is a resource.
 type IndexResource struct {
 	*resozyme.Base
-	view      *struct{}
+	view      *indexView
 	articleID int64
 }
+
+type indexView struct{}
 
 // View returns a resource view.
 func (resc *IndexResource) View() interface{} {

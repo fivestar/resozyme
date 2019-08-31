@@ -22,6 +22,7 @@ func NewArticlesResource(ctx context.Context) resozyme.Resource {
 type ArticlesResource struct {
 	*resozyme.Base
 	view        *articlesView
+	postView    *articleView
 	articleRepo repos.ArticleRepository
 }
 
@@ -30,6 +31,9 @@ type articlesView struct{}
 
 // View returns a resource view.
 func (resc *ArticlesResource) View() interface{} {
+	if resc.postView != nil {
+		return resc.postView
+	}
 	return resc.view
 }
 
@@ -78,7 +82,7 @@ func (resc *ArticlesResource) OnPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	aResc := resozyme.BindTo(NewArticleResource(resc.Context()), article)
-	resc.SetSubstituteView(aResc)
+	resc.postView = aResc.View().(*articleView)
 	resc.SetCode(http.StatusCreated)
 	resc.Header().Add("Location", aResc.Href())
 }

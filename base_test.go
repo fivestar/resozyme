@@ -28,10 +28,6 @@ func TestBase(t *testing.T) {
 		t.Fatalf("Unexpected renderer: got=%+v", base.Renderer())
 	}
 
-	if base.HasSubstituteView() != false {
-		t.Fatalf("Unexpected HasSubstituteView: got=%v", base.HasSubstituteView())
-	}
-
 	base.Bind(nil)
 }
 
@@ -57,18 +53,6 @@ func TestBase_SetRenderer(t *testing.T) {
 
 	if base.Renderer() != renderer {
 		t.Fatalf("Unexpected renderer: got=%+v, want=%+v", base.Renderer(), renderer)
-	}
-}
-
-func TestBase_SetSubstituteView(t *testing.T) {
-	ctx := context.Background()
-	base := NewBase(ctx)
-
-	sr := newHelloResource(base.Context())
-	base.SetSubstituteView(sr)
-
-	if base.SubstituteView() != sr {
-		t.Fatalf("Unexpected substitute view: got=%+v, want=%+v", base.SubstituteView(), sr)
 	}
 }
 

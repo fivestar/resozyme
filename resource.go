@@ -26,14 +26,6 @@ type Resource interface {
 	// SetError sets an error.
 	SetError(error error)
 
-	// SetSubstituteView sets a substitute view.
-	// When the substitute view is set, the view will be overridden by that.
-	SetSubstituteView(sr Resource)
-	// HasSubstituteView returns whether the substitute view is set.
-	HasSubstituteView() bool
-	// SubstituteView returns a substitute view.
-	SubstituteView() Resource
-
 	// AddLink adds a link.
 	AddLink(rel string, l Link)
 	// AddLinkCollection adds the link collection.

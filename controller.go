@@ -56,8 +56,8 @@ func Route(mx chi.Router, path string, fac ResourceFactory) {
 			resc.SetCode(http.StatusMethodNotAllowed)
 		}
 
-		// Prioritize to render a substitute view over an error view.
-		if contr.IsError(resc) && !resc.HasSubstituteView() {
+		// Render error.
+		if contr.IsError(resc) {
 			errResc := contr.HandleError(resc, w, r)
 			contr.Dispatch(errResc, w, r)
 			return
@@ -83,7 +83,7 @@ type Controller interface {
 	// HandleError handles an error resource.
 	HandleError(resc Resource, w http.ResponseWriter, r *http.Request) Resource
 
-	// Logger
+	// Logger returns a logger.
 	Logger() Logger
 }
 
@@ -124,17 +124,12 @@ func (dispatcher *Dispatcher) Dispatch(resc Resource, w http.ResponseWriter, r *
 
 	logger.Debugf("Renderer: %T", renderer)
 
-	rr := resc
-	if resc.HasSubstituteView() {
-		rr = resc.SubstituteView()
-	}
-
 	// check nil
 	var bytes []byte
-	view := rr.View()
+	view := resc.View()
 	vv := reflect.ValueOf(view)
 	if view != nil && (vv.Kind() == reflect.Struct || !vv.IsNil()) {
-		bytes = renderer.Render(rr, dispatcher.prettyEnabled(r))
+		bytes = renderer.Render(resc, dispatcher.prettyEnabled(r))
 	}
 
 	for k, v := range resc.Header() {
