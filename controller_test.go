@@ -72,6 +72,8 @@ func TestDispatcher_ServeHTTP(t *testing.T) {
 			dispatcher.ServeHTTP(w, r)
 
 			resp := w.Result()
+			defer resp.Body.Close()
+
 			body, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
 				t.Fatalf("Unexpected error: got=%s", err)
@@ -81,7 +83,7 @@ func TestDispatcher_ServeHTTP(t *testing.T) {
 				t.Fatalf("Unexpected code: got=%d, want=%d", resp.StatusCode, tt.wantCode)
 			}
 
-			if bytes.Compare(body, tt.wantBody) != 0 {
+			if !bytes.Equal(body, tt.wantBody) {
 				t.Fatalf("Unexpected body: got=%s, want=%s", string(body), string(tt.wantBody))
 			}
 

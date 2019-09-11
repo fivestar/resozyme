@@ -1,0 +1,17 @@
+run:
+  deadline: 1m
+
+linters-settings:
+  errcheck:
+    exclude: .errcheck_excludes.txt
+  funlen:
+    lines: 120
+  gocritic:
+    disabled-checks:
+      - singleCaseSwitch
+
+linters:
+  enable-all: true
+  disable:
+    - maligned
+    - prealloc
