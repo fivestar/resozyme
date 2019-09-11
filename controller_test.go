@@ -14,7 +14,7 @@ func TestDispatcher_ServeHTTP(t *testing.T) {
 	r := chi.NewRouter()
 
 	dispatcher := &Dispatcher{
-		router:          r,
+		mux:             r,
 		defaultRenderer: NewJSONRenderer(),
 		errorHandler:    &ExposedErrorHandler{Renderer: NewJSONRenderer()},
 		logger:          &NilLogger{},
@@ -52,7 +52,25 @@ func TestDispatcher_ServeHTTP(t *testing.T) {
 		},
 		{
 			"/hello",
+			http.MethodPut,
+			http.StatusMethodNotAllowed,
+			[]byte(`{"message":"Method Not Allowed"}`),
+			http.Header{
+				"Content-Type": []string{"application/json"},
+			},
+		},
+		{
+			"/hello",
 			http.MethodPatch,
+			http.StatusMethodNotAllowed,
+			[]byte(`{"message":"Method Not Allowed"}`),
+			http.Header{
+				"Content-Type": []string{"application/json"},
+			},
+		},
+		{
+			"/hello",
+			http.MethodDelete,
 			http.StatusMethodNotAllowed,
 			[]byte(`{"message":"Method Not Allowed"}`),
 			http.Header{

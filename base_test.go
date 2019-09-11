@@ -67,6 +67,36 @@ func TestBase_Handler(t *testing.T) {
 				base.OnGet(w, r)
 			},
 		},
+		{
+			http.MethodPost,
+			func(base *Base, w http.ResponseWriter, r *http.Request) {
+				base.OnPost(w, r)
+			},
+		},
+		{
+			http.MethodPut,
+			func(base *Base, w http.ResponseWriter, r *http.Request) {
+				base.OnPut(w, r)
+			},
+		},
+		{
+			http.MethodPatch,
+			func(base *Base, w http.ResponseWriter, r *http.Request) {
+				base.OnPatch(w, r)
+			},
+		},
+		{
+			http.MethodDelete,
+			func(base *Base, w http.ResponseWriter, r *http.Request) {
+				base.OnDelete(w, r)
+			},
+		},
+		{
+			http.MethodDelete,
+			func(base *Base, w http.ResponseWriter, r *http.Request) {
+				base.OnDelete(w, r)
+			},
+		},
 	}
 
 	for _, tt := range tests {
