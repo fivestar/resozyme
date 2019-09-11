@@ -4,8 +4,6 @@ import (
 	"context"
 	"net/http"
 	"reflect"
-
-	"github.com/go-chi/chi"
 )
 
 // ControllerContextKey is a context key.
@@ -15,9 +13,9 @@ type ControllerContextKey struct{}
 type ResourceFactory = func(context.Context) Resource
 
 // NewController creates a controller.
-func NewController(r chi.Router, logger Logger, debug bool) *Dispatcher {
+func NewController(mux Mux, logger Logger, debug bool) *Dispatcher {
 	return &Dispatcher{
-		router:          r,
+		mux:             mux,
 		defaultRenderer: NewJSONRenderer(),
 		errorHandler:    &ExposedErrorHandler{Renderer: NewJSONRenderer()},
 		logger:          logger,
@@ -27,8 +25,8 @@ func NewController(r chi.Router, logger Logger, debug bool) *Dispatcher {
 }
 
 // Route binds a ResourceFactory to the router.
-func Route(mx chi.Router, path string, fac ResourceFactory) {
-	mx.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+func Route(mux Mux, path string, fac ResourceFactory) {
+	mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		contr := GetController(ctx)
 		logger := contr.Logger()
@@ -89,7 +87,7 @@ type Controller interface {
 
 // Dispatcher handles HTTP request and response.
 type Dispatcher struct {
-	router          chi.Router
+	mux             Mux
 	defaultRenderer Renderer
 	errorHandler    ErrorHandler
 	logger          Logger
@@ -105,7 +103,7 @@ func (dispatcher *Dispatcher) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 	r = r.WithContext(ctx)
 
-	dispatcher.router.ServeHTTP(w, r)
+	dispatcher.mux.ServeHTTP(w, r)
 }
 
 // SetDefaultRenderer implements Controller.
