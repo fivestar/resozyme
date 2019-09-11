@@ -45,7 +45,7 @@ func GetActiveResourceContainer(ctx context.Context) *ResourceContainer {
 func ActivateResource(ctx context.Context, resc Resource) error {
 	rcont := GetActiveResourceContainer(ctx)
 	if rcont == nil {
-		return errors.New("No ActiveResourceContainer defined")
+		return errors.New("no resource container activated")
 	}
 
 	rcont.Set(resc)

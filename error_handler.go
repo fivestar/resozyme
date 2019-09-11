@@ -46,11 +46,7 @@ type ExposedErrorHandler struct {
 
 // IsError implements resource.ErrorHandler.
 func (eh *ExposedErrorHandler) IsError(resc Resource) bool {
-	if resc.Code() >= 400 {
-		return true
-	}
-
-	return false
+	return resc.Code() >= 400
 }
 
 // HandleError implements resource.ErrorHandler.

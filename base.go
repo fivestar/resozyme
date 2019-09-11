@@ -35,8 +35,6 @@ type Base struct {
 	header http.Header
 	error  error
 
-	substituteView Resource
-
 	links              map[string]Link
 	linksCollection    map[string][]Link
 	embedded           map[string]Resource

@@ -1,11 +1,14 @@
 package resozyme
 
-import "testing"
+import (
+	"context"
+	"testing"
+)
 
 func TestResourceContainer(t *testing.T) {
 	rcont := &ResourceContainer{}
 
-	resc := newHelloResource(nil)
+	resc := newHelloResource(context.Background())
 
 	rcont.Set(resc)
 
